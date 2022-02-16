@@ -129,6 +129,18 @@ menu "IOTA Wallet"
         help
             The scale of sampling period
 
+    config SENSOR_DELAY_SECS
+        int "Sensor Sampling Delay"
+        default 1
+        help
+            The delay of sampling period (multiplicator)
+
+    config SENSOR_SAMPLE_REPEAT
+        int "Sensor Sampling Repeat Count"
+        default 3
+        help
+            The number of consecutive sensor readings
+
     config IOTA_UNIT_TESTS
         bool "Testing Application"
         default n

@@ -7,6 +7,7 @@
 
 #include "esp_event.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
 #include "esp_spi_flash.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
@@ -42,6 +43,9 @@
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
+
+// Enable Console
+#define ENABLE_CONSOLE 0
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -313,31 +317,49 @@ void app_main(void) {
     prompt = "Chrysalis> ";
   }
 
-  while (1) {
-    /* Get a line when ENTER is pressed */
-    char* line = linenoise(prompt);
-    if (line == NULL) { /* Ignore empty lines */
-      continue;
+  if (ENABLE_CONSOLE) {
+    while (1) {
+      /* Get a line when ENTER is pressed */
+      char* line = linenoise(prompt);
+      if (line == NULL) { /* Ignore empty lines */
+        continue;
+      }
+
+      // add command to history
+      linenoiseHistoryAdd(line);
+
+      /* Try to run the command */
+      int ret;
+      esp_err_t err = esp_console_run(line, &ret);
+      if (err == ESP_ERR_NOT_FOUND) {
+        printf("Unrecognized command\n");
+      } else if (err == ESP_ERR_INVALID_ARG) {
+        // command was empty
+      } else if (err == ESP_OK && ret != ESP_OK) {
+        printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(err));
+      } else if (err != ESP_OK) {
+        printf("Internal error: %s\n", esp_err_to_name(err));
+      }
+
+      /* linenoise allocates line buffer on the heap, so need to free it */
+      linenoiseFree(line);
     }
-
-    // add command to history
-    linenoiseHistoryAdd(line);
-
-    /* Try to run the command */
-    int ret;
-    esp_err_t err = esp_console_run(line, &ret);
-    if (err == ESP_ERR_NOT_FOUND) {
-      printf("Unrecognized command\n");
-    } else if (err == ESP_ERR_INVALID_ARG) {
-      // command was empty
-    } else if (err == ESP_OK && ret != ESP_OK) {
-      printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(err));
-    } else if (err != ESP_OK) {
-      printf("Internal error: %s\n", esp_err_to_name(err));
+    reboot();
+  } else {
+    send_sensor_data();
+    uint32_t repeat = CONFIG_SENSOR_SAMPLE_REPEAT;
+    uint32_t delay_arg = CONFIG_SENSOR_DELAY_SECS;
+    delay_arg = delay_arg ? delay_arg : 1;
+    TickType_t delay_ticks = delay_arg * CONFIG_SENSOR_DELAY_SCALE * (1000 / portTICK_PERIOD_MS);
+    for (uint32_t i = 1; i < repeat; i++) {
+      vTaskDelay(delay_ticks);
+      send_sensor_data();
     }
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    /* linenoise allocates line buffer on the heap, so need to free it */
-    linenoiseFree(line);
+    const int wakeup_time_sec = 20;
+    printf("Enabling timer wakeup, %ds\n", wakeup_time_sec);
+    esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000);
+    esp_deep_sleep_start();
   }
-  reboot();
 }

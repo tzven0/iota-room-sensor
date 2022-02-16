@@ -17,5 +17,7 @@
 // Register system commands
 void register_wallet_commands();
 int init_wallet();
+// Provide sending sensor data
+int send_sensor_data();
 // timestamp in seconds
 uint64_t timestamp();
