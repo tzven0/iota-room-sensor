@@ -37,27 +37,29 @@ void init_tempsensor() {
 }
 
 float get_temp() {
+  struct sensor_readings_t sensor_reading;
+  sensor_reading.temperature = -99.0;
+  sensor_reading.humidity = -99.0;
 #if ENABLE_TEMP
   float temp = 0.0;
   temp_sensor_start();
   vTaskDelay(1000 / portTICK_RATE_MS);
   temp_sensor_read_celsius(&temp);
   temp_sensor_stop();
-  return temp;
+  sensor_reading.temperature = temp;
 #else
   static const dht_sensor_type_t sensor_type = TEMP_SENSOR_TYPE;
   static const gpio_num_t dht_gpio = TEMP_SENSOR_GPIO_PIN;
-  float temp = 0.0;
   int16_t temperature = 0;
   int16_t humidity = 0;
   esp_err_t temp_ret = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
   if (temp_ret == ESP_OK) {
     ESP_LOGI(TAG, "Humidity: %d%% Temp: %dC", humidity / 10, temperature / 10);
-    temp = temperature / 10;
+    sensor_reading.humidity = humidity / 10;
+    sensor_reading.temperature = temperature / 10;
   } else {
     ESP_LOGE(TAG, "Could not fetch sensor readings.");
-    temp = -99.0;
   }
-  return temp;
 #endif
+  return sensor_reading;
 }

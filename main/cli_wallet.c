@@ -75,8 +75,17 @@ void print_iota(uint64_t value) {
 // json buffer for simple sensor data
 char sensor_json[256];
 char *get_sensor_json() {
+  struct sensor_reading_t sensor_reading = get_temp();
+#if ENABLE_TEMP
   snprintf(sensor_json, sizeof(sensor_json), "{\"Device\":\"%s\",\"Temp\":%.2f,\"timestamp\":%" PRId64 "}",
-           CONFIG_IDF_TARGET, get_temp(), timestamp());
+           CONFIG_IDF_TARGET, sensor_reading.temperature, timestamp(), CONFIG_SENSOR_AXIS_X, CONFIG_SENSOR_AXIS_Y,
+           CONFIG_SENSOR_AXIS_Z);
+#else
+  snprintf(sensor_json, sizeof(sensor_json),
+           "{\"Device\":\"%s\",\"Humidity\":%.2f,\"Temperature\":%.2f,\"timestamp\":%" PRId64 "}", CONFIG_IDF_TARGET,
+           sensor_reading.humidity, sensor_reading.temperature, timestamp(), CONFIG_SENSOR_AXIS_X, CONFIG_SENSOR_AXIS_Y,
+           CONFIG_SENSOR_AXIS_Z);
+#endif
   return sensor_json;
 }
 
@@ -443,7 +452,7 @@ int send_sensor_data() {
   res_send_message_t msg_res = {};
   char *data = get_sensor_json();
 
-  if ((idx = indexation_create("ESP32 Sensor", (byte_t *)data, strlen(data))) == NULL) {
+  if ((idx = indexation_create(CONFIG_INDEXATION_STRING, (byte_t *)data, strlen(data))) == NULL) {
     ESP_LOGE(TAG, "create data payload failed\n");
     return -1;
   }

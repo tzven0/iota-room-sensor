@@ -111,6 +111,12 @@ menu "IOTA Wallet"
         help
             The API port of the IOTA node.
 
+    config INDEXATION_STRING
+                string "indexation"
+                default "ROOM-SENSOR-0X-XXXXX"
+                help
+                    The indexation String for IOTA INDEX.
+
     config WALLET_MNEMONIC
         string "Mnemonic"
         default "random"
@@ -140,6 +146,24 @@ menu "IOTA Wallet"
         default 3
         help
             The number of consecutive sensor readings
+
+    config SENSOR_AXIS_X
+        int "Sensor Installation Axis X Value"
+        default 0
+        help
+            The sensor installation X axis value in [cm] from ground
+
+    config SENSOR_AXIS_Y
+        int "Sensor Installation Axis Y Value"
+        default 0
+        help
+            The sensor installation Y axis value in [cm] from ground
+
+    config SENSOR_AXIS_Z
+        int "Sensor Installation Axis Z Value"
+        default 0
+        help
+            The sensor installation Z axis value in [cm] from ground
 
     config IOTA_UNIT_TESTS
         bool "Testing Application"

@@ -3,5 +3,9 @@
 
 #pragma once
 
+struct sensor_readings_t {
+  float temperature, humidity;
+};
+
 void init_tempsensor();
 float get_temp();
