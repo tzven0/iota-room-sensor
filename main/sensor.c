@@ -51,11 +51,13 @@ float get_temp() {
   int16_t temperature = 0;
   int16_t humidity = 0;
   esp_err_t temp_ret = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
-  if (temp_ret == ESP_OK)
+  if (temp_ret == ESP_OK) {
     ESP_LOGI(TAG, "Humidity: %d%% Temp: %dC", humidity / 10, temperature / 10);
-  else
+    temp = temperature / 10;
+  } else {
     ESP_LOGE(TAG, "Could not fetch sensor readings.");
-  temp = temperature / 10;
+    temp = -99.0
+  }
   return temp;
 #endif
 }
