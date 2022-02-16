@@ -56,7 +56,7 @@ float get_temp() {
     temp = temperature / 10;
   } else {
     ESP_LOGE(TAG, "Could not fetch sensor readings.");
-    temp = -99.0
+    temp = -99.0;
   }
   return temp;
 #endif
