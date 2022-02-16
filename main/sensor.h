@@ -8,4 +8,4 @@ struct sensor_readings_t {
 };
 
 void init_tempsensor();
-float get_temp();
+struct sensor_readings_t get_temp();

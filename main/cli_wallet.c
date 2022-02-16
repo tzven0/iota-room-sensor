@@ -75,16 +75,19 @@ void print_iota(uint64_t value) {
 // json buffer for simple sensor data
 char sensor_json[256];
 char *get_sensor_json() {
-  struct sensor_reading_t sensor_reading = get_temp();
+  struct sensor_readings_t sensor_reading;
+  sensor_reading = get_temp();
 #if ENABLE_TEMP
-  snprintf(sensor_json, sizeof(sensor_json), "{\"Device\":\"%s\",\"Temp\":%.2f,\"timestamp\":%" PRId64 "}",
+  snprintf(sensor_json, sizeof(sensor_json),
+           "{\"Device\":\"%s\",\"Temp\":%.2f,\"timestamp\":%" PRId64 ",\"X-Axis\":%d,\"Y-Axis\":%d,\"Z-Axis\":%d}",
            CONFIG_IDF_TARGET, sensor_reading.temperature, timestamp(), CONFIG_SENSOR_AXIS_X, CONFIG_SENSOR_AXIS_Y,
            CONFIG_SENSOR_AXIS_Z);
 #else
   snprintf(sensor_json, sizeof(sensor_json),
-           "{\"Device\":\"%s\",\"Humidity\":%.2f,\"Temperature\":%.2f,\"timestamp\":%" PRId64 "}", CONFIG_IDF_TARGET,
-           sensor_reading.humidity, sensor_reading.temperature, timestamp(), CONFIG_SENSOR_AXIS_X, CONFIG_SENSOR_AXIS_Y,
-           CONFIG_SENSOR_AXIS_Z);
+           "{\"Device\":\"%s\",\"Humidity\":%.2f,\"Temperature\":%.2f,\"timestamp\":%" PRId64
+           ",\"X-Axis\":%d,\"Y-Axis\":%d,\"Z-Axis\":%d}",
+           CONFIG_IDF_TARGET, sensor_reading.humidity, sensor_reading.temperature, timestamp(), CONFIG_SENSOR_AXIS_X,
+           CONFIG_SENSOR_AXIS_Y, CONFIG_SENSOR_AXIS_Z);
 #endif
   return sensor_json;
 }

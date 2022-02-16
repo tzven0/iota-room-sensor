@@ -36,7 +36,7 @@ void init_tempsensor() {
 #endif
 }
 
-float get_temp() {
+struct sensor_readings_t get_temp() {
   struct sensor_readings_t sensor_reading;
   sensor_reading.temperature = -99.0;
   sensor_reading.humidity = -99.0;
