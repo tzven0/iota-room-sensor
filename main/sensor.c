@@ -16,6 +16,8 @@
 #define ENABLE_TEMP 1
 #else
 #define ENABLE_TEMP 0
+#define TEMP_SENSOR_TYPE DHT_TYPE_DHT11
+#define TEMP_SENSOR_GPIO_PIN 18
 #endif
 
 static const char *TAG = "TempSensor";
@@ -30,7 +32,7 @@ void init_tempsensor() {
   temp_sensor.dac_offset = TSENS_DAC_DEFAULT;  // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
   temp_sensor_set_config(temp_sensor);
 #else
-  ESP_LOGE(TAG, "Temperature sensor is not supported on this hardware");
+  ESP_LOGI(TAG, "Temperature sensor is DHT");
 #endif
 }
 
@@ -43,7 +45,17 @@ float get_temp() {
   temp_sensor_stop();
   return temp;
 #else
-  ESP_LOGE(TAG, "Temperature sensor is not supported on this hardware");
-  return 0.0;
+  static const dht_sensor_type_t sensor_type = TEMP_SENSOR_TYPE;
+  static const gpio_num_t dht_gpio = TEMP_SENSOR_GPIO_PIN;
+  float temp = 0.0;
+  int16_t temperature = 0;
+  int16_t humidity = 0;
+  esp_err_t temp_ret = dht_read_data(sensor_type, dht_gpio, &humidity, &temperature);
+  if (temp_ret == ESP_OK)
+    ESP_LOGI(TAG, "Humidity: %d%% Temp: %dC", humidity / 10, temperature / 10);
+  else
+    ESP_LOGE(TAG, "Could not fetch sensor readings.");
+  temp = temperature / 10;
+  return temp;
 #endif
 }
