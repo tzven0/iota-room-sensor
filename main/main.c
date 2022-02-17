@@ -357,7 +357,7 @@ void app_main(void) {
     }
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    const int wakeup_time_sec = 20;
+    const int wakeup_time_sec = CONFIG_SENSOR_WAKE_UP_TIME;
     printf("Enabling timer wakeup, %ds\n", wakeup_time_sec);
     esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000);
     esp_deep_sleep_start();

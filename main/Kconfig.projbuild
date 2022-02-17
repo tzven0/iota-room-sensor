@@ -129,9 +129,15 @@ menu "IOTA Wallet"
         help
             Support English mnemonic only
 
+    config SENSOR_WAKE_UP_TIME
+        int "Sensor Sleep Time"
+        default 300
+        help
+            Time to sleep between sensor readings in [s]
+
     config SENSOR_DELAY_SCALE
         int "Sensor Sampling Period"
-        default 60
+        default 5
         help
             The scale of sampling period
 
